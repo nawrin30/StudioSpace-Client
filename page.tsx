@@ -1,26 +1,101 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+
+import Link from "next/link";
+import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { getErrorMessage } from "@/lib/errors";
-import type { Booking } from "@/types";
-type HostBooking = Booking & { userName: string; userEmail: string; studio: NonNullable<Booking["studio"]> };
-export default function HostBookingsPage() {
-  const [items, setItems] = useState<HostBooking[]>([]); const [loading, setLoading] = useState(true); const [busyId, setBusyId] = useState("");
-  const load = useCallback(async () => { try { const r = await api.get<HostBooking[]>("/bookings/host"); setItems(r.data); } catch (e) { toast.error(getErrorMessage(e, "Could not load booking requests. Sign in as a host.")); } finally { setLoading(false); } }, []);
-  useEffect(() => { void load(); }, [load]);
-  async function update(id: string, status: "Confirmed" | "Cancelled" | "Completed") { setBusyId(id); try { await api.patch(`/bookings/${id}/status`, { status }); toast.success(`Booking ${status.toLowerCase()}.`); await load(); } catch (e) { toast.error(getErrorMessage(e, "Could not update booking.")); } finally { setBusyId(""); } }
-  return <main className="page shell"><span className="eyebrow">Host workspace</span><h1 className="page-title">Booking requests.</h1><p className="muted">Review and manage reservations for your studio listings.</p>
-    {loading ? <div className="skeleton skeleton-line"/> : items.length ? <div className="table-wrap"><table>
-      <thead><tr><th>Studio</th><th>Creator</th><th>Date & time</th>
-      <th>Total</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody>{items.map((b) => <tr key={b._id}><td>{b.studio?.title}</td>
-      <td>{b.userName}<br/><small>{b.userEmail}</small></td><td>{b.date}<br/>{b.startTime}–{b.endTime}</td>
-      <td>${b.totalPrice.toFixed(2)}</td><td>
-        <span className="badge-status">{b.status}</span></td>
-        <td>{b.status === "Pending" && <><button disabled={busyId === b._id} onClick={() => void update(b._id, "Confirmed")}>Confirm</button>{" "}<button disabled={busyId === b._id} onClick={() => void update(b._id, "Cancelled")}>Decline</button></>}{b.status === "Confirmed" && <button disabled={busyId === b._id} onClick={() => void update(b._id, "Completed")}>Mark completed</button>}</td>
-        </tr>)}</tbody></table>
-        </div> : <div className="empty"><h3>No booking requests yet.</h3>
-        <p className="muted">New reservations for your spaces will appear here.</p></div>}
-  </main>;
+
+import GoogleLoginButton from "@/components/GoogleLoginButton";
+
+interface RegistrationForm {
+  name: string;
+  email: string;
+  photoURL: string;
+  password: string;
+}
+
+const initialForm: RegistrationForm = {
+  name: "",
+  email: "",
+  photoURL: "",
+  password: "",
+};
+
+export default function RegisterPage() {
+  const [form, setForm] = useState<RegistrationForm>(initialForm);
+  const [busy, setBusy] = useState(false);
+  const router = useRouter();
+
+  function updateField(field: keyof RegistrationForm, value: string) {
+    setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const passwordIsValid =
+      form.password.length >= 6 &&
+      /[A-Z]/.test(form.password) &&
+      /[a-z]/.test(form.password);
+
+    if (!passwordIsValid) {
+      toast.error("Use uppercase, lowercase and at least 6 characters in your password.");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      await api.post("/auth/register", form);
+      toast.success("Account created. Please log in.");
+      router.push("/login");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Could not create your account."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="page shell">
+      <div className="form-card">
+        <span className="eyebrow">Join the creative community</span>
+        <h1 className="page-title">Make an account.</h1>
+        <p className="muted">One account. A whole lot of room to create.</p>
+
+        <form onSubmit={handleSubmit}>
+          <label className="field">
+            Your name
+            <input required value={form.name} onChange={(event) => updateField("name", event.target.value)} />
+          </label>
+          <label className="field">
+            Email address
+            <input type="email" required value={form.email} onChange={(event) => updateField("email", event.target.value)} />
+          </label>
+          <label className="field">
+            Photo URL
+            <input type="url" value={form.photoURL} onChange={(event) => updateField("photoURL", event.target.value)} placeholder="https://…" />
+          </label>
+          <label className="field">
+            Password
+            <input type="password" required value={form.password} onChange={(event) => updateField("password", event.target.value)} />
+          </label>
+          <button className="btn btn-dark" disabled={busy} style={{ width: "100%" }}>
+            {busy ? "Creating account…" : "Create account"}
+          </button>
+        </form>
+
+
+        <div style={{ textAlign: "center", margin: "20px 0" }}>
+  <p className="muted">OR CONTINUE WITH</p>
+  <GoogleLoginButton />
+</div>
+
+        <p className="muted">
+          Already have an account? <Link href="/login"><b>Log in</b></Link>
+        </p>
+      </div>
+    </main>
+  );
 }
