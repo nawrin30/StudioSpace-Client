@@ -1,0 +1,23 @@
+export default function Loading() {
+  return (
+    <main className="page shell" aria-label="Loading">
+      <div className="skeleton skeleton-hero"></div>
+
+      <div className="skeleton skeleton-line"></div>
+      <div className="skeleton skeleton-line short"></div>
+
+      <div className="studio-grid">
+        {[1, 2, 3].map((n) => (
+          <div className="studio-card" key={n}>
+            <div className="skeleton" style={{ height: 210 }}></div>
+
+            <div className="card-body">
+              <div className="skeleton skeleton-line"></div>
+              <div className="skeleton skeleton-line short"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </main>
+  );
+}
