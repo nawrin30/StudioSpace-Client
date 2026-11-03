@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
 import type { Studio } from "@/types";
+import { getStudioImage } from "@/lib/studio-images";
 
 const categories = [
   "Photo Studio",
@@ -98,9 +99,9 @@ export default function StudiosPage() {
         <div className="studio-grid">
           {filteredStudios.map((studio) => (
             <article className="studio-card" key={studio._id}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {}
               <img
-                src={studio.imageUrl || "/studio-placeholder.svg"}
+                src={getStudioImage(studio.category, studio.imageUrl)}
                 alt={studio.title}
                 onError={(event) => {
                   event.currentTarget.onerror = null;

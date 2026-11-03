@@ -8,6 +8,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { api } from "@/lib/api";
 import type { Studio } from "@/types";
+import { getStudioImage } from "@/lib/studio-images";
 
 const categories = [
   { icon: "📸", title: "Photo Studios", description: "Bright, beautiful sets", value: "Photo Studio" },
@@ -97,7 +98,7 @@ export default function HomePage() {
               <article className="studio-card" key={studio._id}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={studio.imageUrl || "/studio-placeholder.svg"}
+                  src={getStudioImage(studio.category, studio.imageUrl)}
                   alt={studio.title}
                   onError={(event) => {
                     event.currentTarget.onerror = null;
