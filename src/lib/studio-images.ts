@@ -1,6 +1,4 @@
 export function getStudioImage(category: string, imageUrl?: string) {
-  if (imageUrl) return imageUrl;
-
   const images: Record<string, string> = {
     "Photo Studio": "/photoshop.png",
     "Film Stage": "/flimstage.png",
@@ -9,5 +7,5 @@ export function getStudioImage(category: string, imageUrl?: string) {
     "Workshop": "/workshop.png",
   };
 
-  return images[category] || "/studio-placeholder.svg";
+  return images[category] || imageUrl || "/studio-placeholder.svg";
 }
