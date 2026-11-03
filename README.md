@@ -66,9 +66,8 @@ Google Login is also available.
 
 ## 🔗 Project Links
 
-- **Live Website:** https://your-client-live-url.com
-- **GitHub Client:** YOUR_CLIENT_REPOSITORY_URL
-- **GitHub Server:** YOUR_SERVER_REPOSITORY_URL
+- **Live Website: https://studio-space-client-ruddy.vercel.app/
+
 
 ## 👩‍💻 Developer
 
